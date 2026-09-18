@@ -208,7 +208,7 @@ function App() {
              <h2 style={{ color: '#555', textAlign: 'center' }}>Área de Evaluación</h2>
           ) : !pausaActiva ? (
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{ color: '#FFC107', textShadow: '0 0 10px rgba(255, 193, 7, 0.5)' }}>El video está en reproducción.<br/><br/>Atenta a las preguntas.</h3>
+              <h3 style={{ color: '#FFC107', textShadow: '0 0 10px rgba(255, 193, 7, 0.5)' }}>El video está en reproducción.<br/><br/>Atento a las preguntas.</h3>
             </div>
           ) : (
             <div style={{ overflowY: 'auto', maxHeight: '100%' }}>
