@@ -9,6 +9,7 @@ function App() {
   const [usuario, setUsuario] = useState(null)
   const [esAdmin, setEsAdmin] = useState(false)
   const [accesoAprobado, setAccesoAprobado] = useState(false)
+  const [pantallaAdmin, setPantallaAdmin] = useState(false)
   const [pantallaDashboard, setPantallaDashboard] = useState(false)
   const [datosDashboard, setDatosDashboard] = useState(null)
 
