@@ -9,7 +9,18 @@ function App() {
   const [usuario, setUsuario] = useState(null)
   const [esAdmin, setEsAdmin] = useState(false)
   const [accesoAprobado, setAccesoAprobado] = useState(false)
-  const [pantallaAdmin, setPantallaAdmin] = useState(false)
+  const [pantallaDashboard, setPantallaDashboard] = useState(false)
+  const [datosDashboard, setDatosDashboard] = useState(null)
+
+  const abrirDashboard = async () => {
+    setPantallaDashboard(true)
+    try {
+      const res = await axios.get(`https://panda-agent.onrender.com/dashboard/${usuario.email}`)
+      setDatosDashboard(res.data)
+    } catch (err) {
+      console.error("Error al cargar dashboard", err)
+    }
+  }
   const [solicitudes, setSolicitudes] = useState([])
   const [mensajeAuth, setMensajeAuth] = useState('')
 
@@ -99,7 +110,7 @@ function App() {
     setPausas([]); setPausaActiva(null); setPreguntaActiva(null);
     pausasProcesadas.current = [];
     try {
-      const resp = await axios.post('https://panda-agent.onrender.com/procesar-video', { url: url })
+      const resp = await axios.post('https://panda-agent.onrender.com/procesar-video', { url: url, email: usuario.email })
       if (resp.data.error) {
         setError(resp.data.error)
       } else { 
@@ -142,6 +153,13 @@ function App() {
       valor.toLowerCase().trim() === preguntaActiva.respuesta_correcta.toLowerCase().trim() : 
       (valor.charAt(0) === preguntaActiva.respuesta_correcta || valor === preguntaActiva.respuesta_correcta);
     setRespuestaUsuario(valor);
+    axios.post('https://panda-agent.onrender.com/guardar-progreso', {
+      email: usuario.email,
+      video_id: obtenerVideoId(url),
+      pregunta: preguntaActiva.pregunta,
+      tema: preguntaActiva.tipo,
+      es_correcta: esCorrecta
+    }).catch(e => console.error("Error guardando progreso"));
     if (esCorrecta) {
       setEstadoRespuesta('correcta');
       setTimeout(() => { setPausaActiva(null); setPreguntaActiva(null); setEstadoRespuesta(null); playerRef.current.playVideo(); }, 4000);
@@ -211,6 +229,37 @@ function App() {
     )
   }
 
+  if (pantallaDashboard) {
+    return (
+      <div style={{ background: '#0A192F', minHeight: '100vh', padding: '20px', color: '#FFF' }}>
+        <button onClick={() => setPantallaDashboard(false)} style={{ backgroundColor: '#FF9800', padding: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>← Volver a la App</button>
+        <h2 style={{ color: '#FF9800', marginTop: '20px' }}>Mi Progreso de Aprendizaje</h2>
+        
+        {!datosDashboard ? <p>Cargando estadísticas...</p> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px' }}>
+            <div style={{ backgroundColor: '#121212', padding: '20px', borderRadius: '10px', border: '1px solid #4CAF50' }}>
+              <h3>Resumen General</h3>
+              <p>Total de preguntas respondidas: <strong>{datosDashboard.total}</strong></p>
+              <p style={{ color: '#4CAF50' }}>Aciertos: <strong>{datosDashboard.correctas}</strong></p>
+              <p style={{ color: '#F44336' }}>Fallos: <strong>{datosDashboard.incorrectas}</strong></p>
+            </div>
+            
+            {datosDashboard.errores_recientes.length > 0 && (
+              <div style={{ backgroundColor: '#121212', padding: '20px', borderRadius: '10px', border: '1px solid #F44336' }}>
+                <h3 style={{ color: '#F44336' }}>Temas a reforzar (Últimos errores)</h3>
+                <ul style={{ paddingLeft: '20px' }}>
+                  {datosDashboard.errores_recientes.map((err, idx) => (
+                    <li key={idx} style={{ marginBottom: '10px' }}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ background: 'linear-gradient(135deg, #0A192F 0%, #000000 100%)', minHeight: '100vh', padding: '2vw', color: '#FFFFFF', boxSizing: 'border-box' }}>
       
@@ -220,6 +269,7 @@ function App() {
           {esAdmin && (
             <button onClick={abrirAdmin} style={{ backgroundColor: '#4CAF50', color: '#FFF', padding: '8px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>Panel Admin</button>
           )}
+          <button onClick={abrirDashboard} style={{ backgroundColor: '#2196F3', color: '#FFF', padding: '8px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>Mi Progreso</button>
           <button onClick={() => signOut(auth)} style={{ backgroundColor: '#F44336', color: '#FFF', padding: '8px 15px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>Cerrar Sesión</button>
         </div>
       </div>
