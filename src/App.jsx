@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import YouTube from 'react-youtube'
-import { auth, db, googleProvider, signInWithPopup, signOut } from './firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged } from './firebase'
 import { doc, getDoc } from 'firebase/firestore'
 
 function App() {
