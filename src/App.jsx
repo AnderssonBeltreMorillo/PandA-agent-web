@@ -88,7 +88,7 @@ function App() {
     setSolicitudes(res.data)
   }
 
-  // 3. Lógica del Video (Tu código original)
+  // 3. Lógica del Video
   const obtenerVideoId = (enlace) => {
     const match = enlace.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
     return match ? match[1] : '';
@@ -100,9 +100,15 @@ function App() {
     pausasProcesadas.current = [];
     try {
       const resp = await axios.post('https://panda-agent.onrender.com/procesar-video', { url: url })
-      if (resp.data.error) setError(resp.data.error)
-      else { setResultado(resp.data); setPausas(resp.data.pausas || []) }
-    } catch (err) { setError("Error: " + err.message) } 
+      if (resp.data.error) {
+        setError(resp.data.error)
+      } else { 
+        setResultado(resp.data); 
+        setPausas(resp.data.pausas || []) 
+      }
+    } catch (err) { 
+      setError("Error de red o servidor: " + err.message) 
+    } 
     finally { setCargando(false) }
   }
 
@@ -156,7 +162,6 @@ function App() {
 
   // INTERFACES (Renders)
 
-  // Pantalla 1: Login
   if (!usuario) {
     return (
       <div style={{ background: 'linear-gradient(135deg, #0A192F 0%, #000000 100%)', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -172,7 +177,6 @@ function App() {
     )
   }
 
-  // Pantalla 2: Acceso Pendiente
   if (!accesoAprobado) {
     return (
       <div style={{ background: 'linear-gradient(135deg, #0A192F 0%, #000000 100%)', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -185,7 +189,6 @@ function App() {
     )
   }
 
-  // Pantalla 3: Panel de Administración
   if (esAdmin && pantallaAdmin) {
     return (
       <div style={{ background: '#0A192F', minHeight: '100vh', padding: '20px', color: '#FFF' }}>
@@ -208,11 +211,9 @@ function App() {
     )
   }
 
-  // Pantalla 4: App Principal
   return (
     <div style={{ background: 'linear-gradient(135deg, #0A192F 0%, #000000 100%)', minHeight: '100vh', padding: '2vw', color: '#FFFFFF', boxSizing: 'border-box' }}>
       
-      {/* Cabecera con Botones */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <h1 style={{ color: '#FF9800', margin: 0, textShadow: '0 0 10px rgba(255, 152, 0, 0.8)' }}>P&A Agent</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -228,10 +229,15 @@ function App() {
         <button onClick={procesarVideo} disabled={cargando} style={{ padding: '12px 30px', backgroundColor: '#FF9800', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>{cargando ? 'Analizando...' : 'Comenzar'}</button>
       </div>
 
-      {/* Aquí sigue tu código exacto de la Zona 2 y Zona 3 (Video y Preguntas) */}
+      {/* BLOQUE DE ERROR AÑADIDO AQUI */}
+      {error && (
+        <div style={{ backgroundColor: '#F44336', color: '#FFF', padding: '15px', borderRadius: '10px', marginBottom: '20px', textAlign: 'center', fontWeight: 'bold', border: '2px solid #FFF' }}>
+          {error}
+        </div>
+      )}
+
       {resultado && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2vw', width: '100%', alignItems: 'stretch' }}>
-          {/* Panel de Video / Simulador */}
           <div style={{ flex: '1.5 1 500px', backgroundColor: '#000', padding: '15px', borderRadius: '15px', border: '1px solid #0A192F', display: 'flex', flexDirection: 'column' }}>
             {preguntaActiva?.tipo === 'simulador' && <h3 style={{ color: '#4CAF50', textAlign: 'center', marginTop: 0 }}>Práctica de Laboratorio Activa</h3>}
             <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', flex: 1 }}>
@@ -244,7 +250,6 @@ function App() {
             </div>
           </div>
 
-          {/* Panel de Preguntas */}
           <div style={{ flex: '1 1 300px', backgroundColor: 'rgba(0,0,0,0.8)', padding: '25px', borderRadius: '15px', borderTop: '4px solid #FFC107' }}>
             {!pausaActiva ? (
               <h3 style={{ color: '#FFC107', textAlign: 'center' }}>El video está en reproducción.</h3>
